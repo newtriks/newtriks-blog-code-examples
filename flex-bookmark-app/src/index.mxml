@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" 
+				xmlns:view="com.newtriks.view.components.*"
+				layout="vertical"
+				horizontalAlign="center"
+				horizontalScrollPolicy="off"
+				verticalScrollPolicy="off"
+				backgroundColor="#FFFFFF"
+				creationComplete="facade.startup(this)">
+				
+				
+	<mx:Script>
+		<![CDATA[
+		
+			import com.newtriks.ApplicationFacade;
+			
+			/**
+			 * Get reference to the main ApplicationFacade singleton instance
+			 */
+			private var facade:ApplicationFacade = ApplicationFacade.getInstance();
+			
+		]]>
+	</mx:Script>
+	
+	<view:BookmarkGrid id="bookmarkGrid" height="100%" />
+	
+</mx:Application>

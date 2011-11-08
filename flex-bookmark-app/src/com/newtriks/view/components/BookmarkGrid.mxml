@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml"
+			 dataProvider="{bookmarks}">
+			 
+	<mx:Script>
+		<![CDATA[
+			import mx.events.DataGridEvent;
+		
+			import mx.collections.ArrayCollection;
+			import flash.events.*;
+			
+			[Bindable] public var bookmarks:ArrayCollection;
+			
+		]]>
+	</mx:Script>
+
+	<mx:columns>
+                <mx:DataGridColumn width="260" headerText="Bookmark Name" dataField="title" />
+                <mx:DataGridColumn width="260" headerText="Category" dataField="category" />
+       		    <mx:DataGridColumn width="60" headerText="Link" itemRenderer="com.newtriks.view.renderers.HtmlIconRenderer" />
+      </mx:columns>
+      
+</mx:DataGrid>

@@ -1,0 +1,306 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     Flex ANT Build Script
+     
+     - Deletes build and template directory
+     - Creates build, assets and templates directories
+     - Compiles release and debug swf's
+     - Connects to svn (Adobe Flex Opensource)
+     - Svn checkout of latest Flex SDK > templates > SWFObject
+     - Creates html wrappers for release and debug using SWFObject template
+     - Copy asset librarys across to release and debug dir
+     - Cleanup > delete temporary template directory
+     
+     ** NOTES **
+     
+     Each build will run the above tasks.  This is by no means suggested
+     all should be run on each build.  Its all incorporated in one continuous 
+     script for example purposes.  A suggestion would be to seperate the 
+     SVN task retrieving the latest Flex SDK SWFObject release and running
+     on project creation thus ensuring you have the latest build.
+                   
+     Author: Newtriks (simon@newtriks.com)        
+     Date :17th May 2009
+     
+     [Based on portions of code written by:Constantiner(constantiner@gmail.com)]                                                       
+     ====================================================================== -->
+<project name="Flex Ant Tasks Build Script" default="build" basedir=".">
+ 
+	<!-- load previously defined configuration properties file -->
+	<property file="build.properties" />
+
+	<!-- flexTasks.jar copied to the libs folder to distribute with the project -->
+	<taskdef resource="flexTasks.tasks" classpath="${flex.tasks.jar}"/> 
+	
+	<!-- SVN classpath including jars required -->
+	<path id="svnant.class.path">
+		<pathelement location="${svn.ant.jar}" />
+		<pathelement location="${svn.clientadapter.jar}" />
+		<pathelement location="${svn.javahl.jar}" />
+	</path>
+	
+	<!-- Load the svn task -->
+	<taskdef resource="svntask.properties" classpathref="svnant.class.path"/>
+    
+	<!-- ================================= 
+          target: build              
+         ================================= -->
+	<target name="build"
+			depends="clear,
+	    			 init,
+	    			 compile.release,
+					 compile.debug,
+					 svnant-availability,
+					 svn.checkout.template,
+					 make.release.wrapper,
+					 make.debug.wrapper,
+		 			 copy.assets,
+					 templates.cleanup" 
+			description="${PROJECT.FULLNAME}">
+	 </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: clear                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="clear">
+		<tstamp>
+			<format property="build.datetime" pattern="dd/MM/yyyy hh:mm:ss aa" />
+		</tstamp>
+		<echo message="============================================="/>
+		<echo message="${PROJECT.NAME}-${PROJECT.VERSION} [${build.datetime}]"/>
+		<echo message="Copyright (c) ${PROJECT.YEAR} ${PROJECT.OWNER}"/>
+		<echo message="OS : ${os.name}" />
+		<echo message="Author: ${AUTHOR}" />
+		<echo message="=============================================="/>
+		<delete dir="${build.dir}" failonerror="false" />
+		<delete dir="${basedir}/templates" failonerror="false" />
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: init                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="init">
+    	<mkdir dir="${build.dir}"/>
+    	<mkdir dir="${release.build.dir}"/>
+    	<mkdir dir="${debug.build.dir}"/>
+    	<mkdir dir="${release.build.dir.assets}"/>
+    	<mkdir dir="${debug.build.dir.assets}"/>
+    	<mkdir dir="${basedir}/templates"/>
+    </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: svnant-availability                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="svnant-availability">
+			<available resource="svntask.properties" classpathref="svnant.class.path" property="available.svnant" />
+			<echo message="SVN ANT is available = ${available.svnant}"/>
+	</target>
+	
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: compile.release
+         - - - - - - - - - - - - - - - - - -->
+    <target name="compile.release">
+    	<mxmlc.compile
+    		in="${main.application}"
+    		out="${main.application.release.out}" />
+    </target>
+	
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: compile.debug
+         - - - - - - - - - - - - - - - - - -->
+    <target name="compile.debug">
+    	<mxmlc.compile
+    		in="${main.application}"
+    		out="${main.application.debug.out}"
+    		debug="true" />
+    </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: svn.checkout.template
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="svn.checkout.template">
+		<svn>
+			<checkout url="${wrapper.template.url}" revision="HEAD" destPath="${wrapper.dir}" />
+		</svn>
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: make.debug.wrapper
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="make.debug.wrapper">
+	    <make.wrapper
+	    	 			width="${swf.width}"
+	    				height="${swf.height}"
+	    				title="${swf.debug.title}"
+	    				version.major="${swf.version.major}"
+	    				version.minor="${swf.version.minor}"
+	    				version.revision="${swf.version.revision}"
+	    				application="${output.swf.name}"
+	    				swf="${output.swf.name}"
+	    				bgcolor="${swf.bgcolor}"
+	    				wrapper.dir="${wrapper.dir}"
+	    				output.dir="${debug.build.dir}"
+	    				output.html="${output.debug.html}" />
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: make.release.wrapper
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="make.release.wrapper">
+	    <make.wrapper
+	    	 			width="${swf.width}"
+	    				height="${swf.height}"
+	    				title="${swf.release.title}"
+	    				version.major="${swf.version.major}"
+	    				version.minor="${swf.version.minor}"
+	    				version.revision="${swf.version.revision}"
+	    				application="${output.swf.name}"
+	    				swf="${output.swf.name}"
+	    				bgcolor="${swf.bgcolor}"
+	    				wrapper.dir="${wrapper.dir}"
+	    				output.dir="${release.build.dir}"
+	    				output.html="${output.release.html}" />
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: copy.assets
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="copy.assets">
+		<copy todir="${debug.build.dir.assets}">
+			<!-- Ensure any fonts directories are not copied to debug -->
+			<fileset dir="${assets.dir}" includes="**/*" excludes="**/fonts/" />
+		</copy>	
+		<copy todir="${release.build.dir.assets}">
+			<fileset dir="${assets.dir}" includes="**/*" />
+		</copy>	
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: templates.cleanup
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="templates.cleanup">
+		<delete dir="${basedir}/templates" failonerror="false" />	
+	</target>
+	
+	<!-- = = = = = = = = = = = = = = = = =
+          macrodef: mxmlc.compile          
+         = = = = = = = = = = = = = = = = = -->
+    <macrodef name="mxmlc.compile">
+        <attribute name="in" />
+        <attribute name="out" />
+    	<attribute name="config" default="${flex.config.xml}" />
+    	<attribute name="additional" default="" />
+    	<attribute name="incremental" default="false" />
+    	<attribute name="debug" default="false" />
+		<sequential>
+			<mxmlc 
+	        	    file="@{in}" 
+				    output="@{out}"
+					fork="true"
+				    maxmemory="1024m"
+				    actionscript-file-encoding="${default.encoding}"
+				    keep-generated-actionscript="false"
+				    incremental="@{incremental}"
+					debug="@{debug}">
+	        		
+	                <!-- Get default compiler options. -->
+	            	<load-config filename="@{config}" />           
+				 
+	            	<!-- List of path elements that form the roots of ActionScript class hierarchies. -->
+	            	<compiler.source-path path-element="${FLEX_HOME}/frameworks"/>
+					<compiler.source-path path-element="${src.dir}"/> 			
+				
+		            <!-- List of built in SWC files or directories that contain SWC files. -->
+		            <compiler.library-path dir="${FLEX_HOME}/frameworks/libs" append="true">
+		            	<include name="*" />
+		                <include name="../bundles/{locale}" />
+		            </compiler.library-path>
+						
+					<!-- Project SWC library -->
+		            <compiler.library-path dir="${libs.dir}" append="true">
+		                <include name="**.swc" />
+		            </compiler.library-path>
+					
+		            <!-- SWF dimensions --> 
+		            <default-size width="${swf.width}" height="${swf.height}" />
+		    </mxmlc>
+	    	<echo>Succesfully compiled @{in} to @{out}</echo>
+	    </sequential>
+   	</macrodef>
+
+	<!-- = = = = = = = = = = = = = = = = =
+          macrodef: make.wrapper          
+         = = = = = = = = = = = = = = = = = -->
+    <macrodef name="make.wrapper">
+        <attribute name="width" default="100%" />
+        <attribute name="height" default="100%" />
+        <attribute name="title" default="" />
+        <attribute name="version.major" default="9" />
+        <attribute name="version.minor" default="0" />
+        <attribute name="version.revision" default="124" />
+        <attribute name="application" default="" />
+        <attribute name="swf" default="" />
+        <attribute name="bgcolor" default="#FFFFFF" />
+        <attribute name="wrapper.dir" />
+        <attribute name="output.dir" />
+        <attribute name="output.html" />
+        <sequential>
+        	<copy todir="@{output.dir}">
+        		<fileset dir="@{wrapper.dir}">
+    	    		<exclude name="**/index.template.html" />
+        		</fileset>
+        	</copy>
+	    	<copy 
+	    		file="@{wrapper.dir}/index.template.html"
+	    		tofile="@{output.html}" />
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{width\}"
+        		replace="@{width}"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{height\}"
+        		replace="@{height}"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{title\}"
+        		replace="@{title}"
+        		encoding="utf-8"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{version_major\}"
+        		replace="@{version.major}"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{version_minor\}"
+        		replace="@{version.minor}"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{version_revision\}"
+        		replace="@{version.revision}"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{application\}"
+        		replace="@{application}"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{bgcolor\}"
+        		replace="@{bgcolor}"/>
+        	<replaceregexp 
+        		file="@{output.html}"
+        		flags="gs"
+        		match="\$\{swf\}"
+        		replace="@{swf}"/>
+        	<echo>Succesfully wrapped @{swf}.swf into "@{output.html} using template: ${wrapper.template}</echo>
+        </sequential>
+    </macrodef>
+	
+</project>

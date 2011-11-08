@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" creationComplete="sourceIcon()">
+
+    <mx:Script>
+        <![CDATA[
+
+            import mx.events.*;
+            
+            [Bindable]
+            public var iconImage:String;
+            
+            public function sourceIcon():void
+            {
+            	if(data.url != "")
+            	{
+            		iconImage = '../assets/icons/icon_html.gif';
+            	}
+            }
+            
+            public function gotoURL(event:MouseEvent):void
+            {
+            	flash.net.navigateToURL( new URLRequest( data.url ), '_blank');
+            }
+            
+        ]]>
+    </mx:Script>
+    
+	<mx:Image id="actionImage" 
+			  source = "{ iconImage  }" 
+			  toolTip="{ data.url }" 
+			  useHandCursor="true" 
+			  buttonMode="true" 
+			  mouseChildren="false"
+			  horizontalAlign="center" 
+			  click="gotoURL(event)"/>
+</mx:HBox>
+

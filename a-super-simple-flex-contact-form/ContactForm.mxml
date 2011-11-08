@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.*;
+			import flash.net.*;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+         	import mx.rpc.events.ResultEvent;
+			
+			private const FORM_URL:String = "http://www.yourhost.com/mycfc/formSend.cfm";
+			
+		    public function gotoEmail(e:Event):void {
+		       var u:URLRequest = new URLRequest("mailto:" + urlLink.text);
+		       navigateToURL(u,"_self");
+		    }
+		    
+		    public function handleResult(event:ResultEvent):void 
+		    {
+            	Alert.show( "Thankyou for your comment", "Alert!", Alert.OK );
+            	resetForm();
+	        }
+	        public function handleFault(event:FaultEvent):void 
+	        {
+	           your_comment.text = event.fault.toString();
+	        }
+		    
+			private function resetForm():void
+			{
+				your_name.text = "";
+				your_email.text = "";
+				your_comment.text = "";
+			}
+
+		]]>
+	</mx:Script>
+	<mx:HTTPService id="commentForm" 
+					url="{FORM_URL}" 
+					method="POST" 
+					result="handleResult(event)" 
+					fault="handleFault(event)" 
+					resultFormat="text">
+      <mx:request>
+         <name>{your_name.text}</name>
+         <email>{your_name.text}</email>
+         <message>{your_name.text}</message>
+      </mx:request>
+    </mx:HTTPService>
+    
+		<mx:Form id="contactForm" visible="true">
+			<mx:FormHeading/>
+			<mx:FormItem label="Your Name">
+				<mx:TextInput id="your_name" width="310"/>
+			</mx:FormItem>
+			<mx:FormItem label="Your Email">
+				<mx:TextInput id="your_email" width="{your_name.width}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Comment">
+				<mx:TextArea id="your_comment" width="{your_name.width}" height="125"/>
+			</mx:FormItem>
+			<mx:ControlBar width="100%">
+	            <mx:Label id="urlLink" click="gotoEmail(event);" text="Email: simon@newtriks.com"/>
+	            <mx:Spacer width="100%"/>
+	            <mx:Button label="Submit" click="commentForm.send()"/>
+			</mx:ControlBar>
+		</mx:Form>
+</mx:VBox>
