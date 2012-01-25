@@ -15,6 +15,7 @@ Icon?
 bin/
 bin-release/
 bin-debug/
+out/
 
 # Project property files
 .actionScriptProperties
