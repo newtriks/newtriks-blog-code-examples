@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+               xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:views="com.newtriks.examples.exchange.views.components.*"
+               xmlns:rl="com.newtriks.examples.exchange.*"
+               pageTitle="Exchange Example"
+               width="100%"
+               height="100%">
+    <s:layout>
+        <s:VerticalLayout
+                paddingTop="20"
+                paddingLeft="20"
+                paddingRight="20"
+                paddingBottom="20"
+                horizontalAlign="center"/>
+    </s:layout>
+    <fx:Declarations>
+        <rl:ExchangeContext contextView="{view}" />
+    </fx:Declarations>
+    <views:ExchangeView id="view"/>
+</s:Application>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<s:Group xmlns:s="library://ns.adobe.com/flex/spark"
+         xmlns:fx="http://ns.adobe.com/mxml/2009"
+         xmlns:signals="org.osflash.signals.*">
+    <s:layout>
+        <s:HorizontalLayout paddingLeft="10"
+                            paddingRight="10"
+                            paddingBottom="10"
+                            paddingTop="10"/>
+    </s:layout>
+    <fx:Declarations>
+        <signals:Signal id="submitTrackRequestSignal"/>
+    </fx:Declarations>
+    <s:TextInput id="trackRequest_txt"
+                 width="200"/>
+    <s:Button id="submit_btn"
+              label="Track request"
+              click="submitTrackRequestSignal.dispatch()"/>
+</s:Group>
