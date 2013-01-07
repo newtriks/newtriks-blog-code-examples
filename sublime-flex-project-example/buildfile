@@ -1,0 +1,55 @@
+require "fileutils"
+require "buildr/as3" # needs - gem install buildr-as3 -v "0.2.30.pre"
+
+# Version number for this release will become dynamic
+VERSION_NUMBER = "0.0.1"
+
+# Group identifier for your projects
+GROUP = "com.newtriks"
+COPYRIGHT = "newtriks.com"
+
+# Specify Maven 2.0 remote repositories here, like this:
+repositories.remote << "http://artifacts.devboy.org" << "http://repo2.maven.org/maven2"
+
+# My personal preference for directory layout: root/src and root/test
+layout = Layout::Default.new
+layout[:source, :main, :as3] = "src"
+layout[:source, :test, :as3] = "test"
+
+desc "The example project"
+define "Example", :layout => layout do
+
+  project.version = VERSION_NUMBER
+  project.group = GROUP
+
+  args = ["-warnings=false", "-optimize=true"]
+
+  app = _(:src, "Main.mxml")
+  compile.using( :mxmlc, :main => app, :flexsdk => flexsdk, :args => args, :debug => false ).
+      with( _(:lib,"Beaver-v1.0.4.swc") )
+  compile.into _(:bin, :swf)
+
+  testrunner = _(:source, :test, :as3, "MainTestRunner.mxml")
+  test.using(:flexunit4 => true, :headless => false, :version => "4.1.0-8", :verbose => true)
+
+  test.compile.using( :main => testrunner, :args => [] ).
+      with( FlexUnit4.swcs("4.1.0-8", "4.1.0.16076", :flex),
+                _(:lib,"tdd/fluint-extensions-4.1.0-8-4.1.0.16076.swc"),
+                _(:lib,"tdd/hamcrest-as3-flex-1.1.3.swc"),
+                _(:lib,"tdd/mockolate-0.12.2-flex.swc") )
+  test.compile.from _(:src)
+
+end
+
+def flexsdk
+  version = "4.5.0.20967"
+  @flexsdk ||= begin
+    # should be using the flex sdk version from user.properties (if it exists) or environment
+    flexsdk = FlexSDK.new(version)
+    flexsdk.default_options  << ["-keep-as3-metadata+=Inject",
+                                "-keep-as3-metadata+=PostConstruct",
+                                "-default-size=250,80",
+                                "-define=CONFIG::DevServer,false"]
+    flexsdk
+  end
+end

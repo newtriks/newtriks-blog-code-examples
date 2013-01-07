@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" creationComplete="creationCompleteHandler(event)">
+    <fx:Script><![CDATA[
+        import mx.events.FlexEvent;
+
+        private function creationCompleteHandler(event:FlexEvent):void {
+            BeaverLog.send("Hello Sublime", this);
+        }
+        ]]></fx:Script>
+    <s:Label text="Hello Sublime" fontSize="36"/>
+</s:Application>

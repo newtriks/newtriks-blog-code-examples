@@ -1,0 +1,5 @@
+# Sublime
+.sublime-workspace
+.sublime-project
+# Mac finder artifacts
+.DS_Store
